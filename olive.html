@@ -1,0 +1,194 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { RefreshCw, Download, Copy, Check } from 'lucide-react';
+
+const AvoidantAttachmentGenerator = () => {
+  const [currentQuote, setCurrentQuote] = useState("");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const canvasRef = useRef(null);
+
+  // 語錄庫：專門寫給迴避型依戀者，幫助他們理解關係與焦慮型伴侶
+  const quotes = [
+    "你的獨立很迷人，但適度的依賴，並不代表會失去自我。",
+    "他在尋求確認，不是為了控制你，只是為了確認這段關係還安全。",
+    "你需要空間充電，這沒問題。只要在轉身前，先給他一個具體的歸期。",
+    "沈默是你的防護罩，但對他來說，卻是隨時會被拋棄的警報。",
+    "愛不是要吞噬你的靈魂，而是兩個完整的人，選擇並肩同行。",
+    "試著說出「我現在有點累，需要休息一下」，而不是直接消失。",
+    "衝突不代表關係的毀滅，它只是溝通的一種激烈形式。",
+    "他的焦慮，其實是在大聲說著「我很在乎你」。",
+    "不要預設他會勒索你的情緒，試著去接住一次看看，你也許會發現自己比想像中強大。",
+    "親密感不會讓你窒息，那是靈魂得以棲息的港灣。",
+    "解釋並不是示弱，而是為了保護這段關係不被誤解。",
+    "給予一點點安心的訊號，就能省去後面大段的爭吵。",
+    "你不需要為他的情緒負責，但你可以陪著他經歷情緒。",
+    "偶爾展現脆弱，也是一種強大的力量。",
+    "逃避雖然有用，但這一次，試著留下來解決問題。",
+    "真正的自由，是在親密關係裡依然能做真實的自己。",
+    "別讓「怕麻煩」成為錯過深層連結的藉口。",
+    "回應期待，不等於要犧牲邊界。",
+    "他要的不是你的全部時間，而是你在的時候，心也在。",
+    "慢下來，去感受連結，而不是急著分析利弊。",
+    "不要等到準備好才去愛，愛是在互動中學會的。",
+    "一句簡單的「我在」，勝過千言萬語的辯解。",
+    "主動報備不是被監控，而是給予信任的邀請函。",
+    "堅強太久會累，允許自己被接住一次吧。"
+  ];
+
+  useEffect(() => {
+    generateQuote();
+  }, []);
+
+  const generateQuote = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * quotes.length);
+      setCurrentQuote(quotes[randomIndex]);
+      setIsAnimating(false);
+      setCopied(false);
+    }, 300);
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentQuote);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // 下載圖片邏輯
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const size = 1080; // 高解析度
+    
+    // 設定畫布尺寸
+    canvas.width = size;
+    canvas.height = size;
+
+    // 1. 繪製背景 (淡裸粉)
+    ctx.fillStyle = '#F9F1F0'; 
+    ctx.fillRect(0, 0, size, size);
+
+    // 2. 設定文字樣式 (紫紅色)
+    ctx.fillStyle = '#6A2C39';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // 設定字體 (嘗試使用襯線體)
+    const fontSize = 48;
+    ctx.font = `500 ${fontSize}px "Noto Serif TC", "Songti TC", serif`;
+
+    // 3. 文字換行邏輯
+    const text = currentQuote;
+    const maxWidth = size * 0.7; // 文字最大寬度佔畫布 70%
+    const lineHeight = fontSize * 1.8;
+    const words = text.split('');
+    let line = '';
+    let lines = [];
+
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i];
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+      if (testWidth > maxWidth && i > 0) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+
+    // 4. 繪製文字 (垂直置中)
+    const totalHeight = lines.length * lineHeight;
+    let startY = (size - totalHeight) / 2 + (lineHeight / 2); // 稍微修正基線
+
+    lines.forEach((line, index) => {
+      ctx.fillText(line, size / 2, startY + index * lineHeight);
+    });
+
+    // 5. 添加極簡裝飾 (底部小字)
+    ctx.font = `300 24px "Noto Sans TC", sans-serif`;
+    ctx.fillStyle = '#8C5E66'; // 稍淡的紫紅
+    ctx.fillText("Avoidant Attachment Healing Note", size / 2, size - 80);
+
+    // 6. 觸發下載
+    const link = document.createElement('a');
+    link.download = `healing-note-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F2EBE9] flex items-center justify-center p-4 font-serif">
+      <div className="max-w-md w-full flex flex-col items-center gap-8">
+        
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-[#6A2C39] text-xl tracking-[0.2em] font-light uppercase">
+            Inner Dialog
+          </h1>
+          <p className="text-[#8C5E66] text-xs tracking-widest">
+            給迴避依戀的溫柔備忘錄
+          </p>
+        </div>
+
+        {/* The Card Display (Visual Preview) */}
+        <div 
+          className="relative group w-full aspect-square bg-[#F9F1F0] shadow-xl shadow-[#6A2C39]/5 flex items-center justify-center p-12 transition-all duration-700 ease-in-out"
+        >
+          {/* Decorative Corner Lines - Minimalist */}
+          <div className="absolute top-6 left-6 w-8 h-[1px] bg-[#6A2C39]/20"></div>
+          <div className="absolute top-6 left-6 h-8 w-[1px] bg-[#6A2C39]/20"></div>
+          <div className="absolute bottom-6 right-6 w-8 h-[1px] bg-[#6A2C39]/20"></div>
+          <div className="absolute bottom-6 right-6 h-8 w-[1px] bg-[#6A2C39]/20"></div>
+
+          <div className={`transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
+            <p className="text-[#6A2C39] text-lg md:text-xl font-medium leading-loose tracking-widest text-center whitespace-pre-wrap font-serif">
+              {currentQuote}
+            </p>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex gap-6 items-center">
+           {/* Generate Button */}
+          <button 
+            onClick={generateQuote}
+            className="group relative px-8 py-3 bg-[#6A2C39] text-[#F9F1F0] rounded-full shadow-lg hover:shadow-xl hover:bg-[#52222c] transition-all duration-300 flex items-center gap-2"
+          >
+            <RefreshCw size={18} className={`transition-transform duration-700 ${isAnimating ? 'rotate-180' : ''}`} />
+            <span className="tracking-widest text-sm">生成新語句</span>
+          </button>
+
+          {/* Action Icons */}
+          <div className="flex gap-2">
+            <button 
+              onClick={handleCopy}
+              className="p-3 rounded-full bg-white text-[#6A2C39] shadow-sm hover:shadow-md hover:bg-[#FDF6F5] transition-all border border-[#F9F1F0]"
+              title="複製文字"
+            >
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+            </button>
+            <button 
+              onClick={handleDownload}
+              className="p-3 rounded-full bg-white text-[#6A2C39] shadow-sm hover:shadow-md hover:bg-[#FDF6F5] transition-all border border-[#F9F1F0]"
+              title="下載圖片"
+            >
+              <Download size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Hidden Canvas for Image Generation */}
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        
+        <div className="text-[#8C5E66]/60 text-[10px] tracking-widest mt-4">
+           DESIGNED FOR THE AVOIDANT
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AvoidantAttachmentGenerator;
